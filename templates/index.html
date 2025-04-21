@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Powered Content Generator and Analyzer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            padding-top: 56px;
+        }
+        .container {
+            max-width: 800px;
+        }
+        .form-section {
+            margin-bottom: 40px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+        .result-section {
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f1f1f1;
+        }
+    </style>
+</head>
+<body class="pt-14 bg-gray-50">
+    <nav class="fixed top-0 left-0 right-0 bg-white shadow-sm z-10">
+        <div class="container mx-auto max-w-3xl px-4">
+            <div class="flex justify-between items-center h-14">
+                <a href="#" class="text-gray-800 font-semibold text-lg">AI Content & Analysis</a>
+                <button class="md:hidden p-2" id="menu-toggle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
+                <div class="hidden md:flex space-x-4" id="navbar-menu">
+                    <a href="#content-section" class="text-gray-600 hover:text-gray-900">Generate Content</a>
+                    <a href="#analysis-section" class="text-gray-600 hover:text-gray-900">Analyze Content</a>
+                    <a href="#result-section" class="text-gray-600 hover:text-gray-900">Results</a>
+                </div>
+            </div>
+            <div class="md:hidden hidden" id="mobile-menu">
+                <div class="flex flex-col py-2 space-y-2">
+                    <a href="#content-section" class="text-gray-600 hover:text-gray-900">Generate Content</a>
+                    <a href="#analysis-section" class="text-gray-600 hover:text-gray-900">Analyze Content</a>
+                    <a href="#result-section" class="text-gray-600 hover:text-gray-900">Results</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <div class="container mx-auto max-w-3xl px-4 mt-8">
+        <h1 class="mb-6 text-center text-2xl font-bold text-gray-800">AI-Powered Content Generator and Analyzer</h1>
+
+        <div id="content-section" class="mb-10 p-6 border border-gray-200 rounded-lg bg-white shadow-sm">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">Generate Content</h2>
+            <form id="content-form">
+                <div class="mb-4">
+                    <label for="topic" class="block text-gray-700 mb-2">Enter Topic</label>
+                    <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" id="topic" required>
+                </div>
+                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">Generate Content</button>
+            </form>
+        </div>
+
+        <div id="analysis-section" class="mb-10 p-6 border border-gray-200 rounded-lg bg-white shadow-sm">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">Analyze Content</h2>
+            <form id="analyze-form">
+                <div class="mb-4">
+                    <label for="content" class="block text-gray-700 mb-2">Enter Content for Analysis</label>
+                    <textarea class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" id="content" rows="4" required></textarea>
+                </div>
+                <div class="flex space-x-2">
+                    <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">Analyze Content</button>
+                    <button type="button" class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2" id="import-content">Import Generated Content</button>
+                </div>
+            </form>
+        </div>
+
+        <div id="result-section" class="p-6 border border-gray-200 rounded-lg bg-gray-100 shadow-sm">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">Results</h2>
+            <div class="mb-6">
+                <h3 class="text-lg font-medium text-gray-700 mb-2">Generated Content</h3>
+                <p id="generated-content" class="bg-white p-4 rounded-md border border-gray-200"></p>
+            </div>
+            <div>
+                <h3 class="text-lg font-medium text-gray-700 mb-2">Analysis Results</h3>
+                <ul class="bg-white p-4 rounded-md border border-gray-200">
+                    <li class="mb-2">Readability: <span id="readability" class="font-medium"></span></li>
+                    <li>Sentiment: <span id="sentiment" class="font-medium"></span></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Toggle mobile menu
+        document.getElementById('menu-toggle').addEventListener('click', () => {
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        document.getElementById('content-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const topic = document.getElementById('topic').value;
+            const payload = { topic: topic };
+
+            const response = await fetch('/generate/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await response.json();
+            document.getElementById('generated-content').innerText = data.generated_text;
+        });
+
+        document.getElementById('analyze-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const content = document.getElementById('content').value;
+            const payload = { content: content };
+
+            const response = await fetch('/analyze/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await response.json();
+            document.getElementById('readability').innerText = data.readability;
+            document.getElementById('sentiment').innerText = data.sentiment;
+        });
+
+        document.getElementById('import-content').addEventListener('click', () => {
+            const generatedContent = document.getElementById('generated-content').innerText;
+            document.getElementById('content').value = generatedContent;
+        });
+    </script>
+</body>
+</html>
